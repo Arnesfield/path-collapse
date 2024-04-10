@@ -1,6 +1,6 @@
 {
   "name": "path-collapse",
-  "version": "0.0.1-alpha.1",
+  "version": "1.0.0",
   "description": "Collapse paths that are part of another path.",
   "keywords": [
     "path",
