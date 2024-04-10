@@ -22,19 +22,17 @@ export interface Collapsed {
  * @returns The collapsed paths.
  */
 export function collapse(paths: readonly string[]): Collapsed {
-  const values = obj<{ [rPath: string]: Set<string> }>();
+  const values = obj<{ [rPath: string]: string[] }>();
   const rPaths: string[] = [];
   // resolve paths first and avoid duplicates
-  for (const value of paths) {
+  for (const value of new Set(paths)) {
     const rPath = path.isAbsolute(value)
       ? path.resolve(value)
       : path.relative('', value) || '.';
-    if (rPath in values) {
-      values[rPath].add(value);
-    } else {
-      values[rPath] = new Set([value]);
+    if (!(rPath in values)) {
       rPaths.push(rPath);
     }
+    (values[rPath] ||= []).push(value);
   }
 
   const c: Collapsed = { roots: obj(), descendants: obj() };
@@ -58,13 +56,13 @@ export function collapse(paths: readonly string[]): Collapsed {
       if (ancestors) {
         // ancestors reuses the same array reference
         // make sure to create new reference
-        c.descendants[value] = Array.from(ancestors);
+        c.descendants[value] = ancestors.slice();
       } else {
         c.roots[value] = [];
       }
     }
     // assume root object has a value since
-    // ancestors set comes from the previous resolved path
+    // ancestors array comes from the previous resolved path
     for (const value of ancestors || []) {
       c.roots[value].push(...values[current]);
     }
