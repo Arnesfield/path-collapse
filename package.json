@@ -69,6 +69,6 @@
     "typescript": "^5.4.4"
   },
   "engines": {
-    "node": "*"
+    "node": ">=16"
   }
 }
