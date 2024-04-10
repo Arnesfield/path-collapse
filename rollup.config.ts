@@ -2,7 +2,8 @@ import _eslint from '@rollup/plugin-eslint';
 import _typescript from '@rollup/plugin-typescript';
 import { RollupOptions } from 'rollup';
 import dts from 'rollup-plugin-dts';
-import esbuild, { Options as EsbuildOptions } from 'rollup-plugin-esbuild';
+import esbuild from 'rollup-plugin-esbuild';
+import externals from 'rollup-plugin-node-externals';
 import outputSize from 'rollup-plugin-output-size';
 import pkg from './package.json' with { type: 'json' };
 
@@ -15,10 +16,6 @@ const typescript = _typescript as unknown as typeof _typescript.default;
 const WATCH = process.env.ROLLUP_WATCH === 'true';
 const input = 'src/index.ts';
 
-function build(options: EsbuildOptions = {}) {
-  return esbuild({ target: 'esnext', ...options });
-}
-
 function defineConfig(options: (false | RollupOptions)[]) {
   return options.filter((options): options is RollupOptions => !!options);
 }
@@ -27,12 +24,12 @@ export default defineConfig([
   {
     input,
     output: { file: pkg.module, format: 'esm', exports: 'named' },
-    plugins: [build(), outputSize()]
+    plugins: [esbuild({ target: 'esnext' }), externals(), outputSize()]
   },
   { input, output: { file: pkg.types }, plugins: [dts(), outputSize()] },
   WATCH && {
     input,
     watch: { skipWrite: true },
-    plugins: [eslint(), typescript()]
+    plugins: [eslint(), externals(), typescript()]
   }
 ]);
